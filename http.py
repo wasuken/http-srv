@@ -64,11 +64,11 @@ def request(ip, port, path):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.connect((ip, port))
         s.sendall("""GET {} HTTP/1.1
-User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3
-Host: www.example.com
+User-Agent: unche
+Host: localhost
 Accept-Language: en, mi""".format(path).encode('utf-8'))
         data = s.recv(1024)
-        print(http_response_parse(repr(data)))
+        print(http_response_parse(data.decode('utf-8')))
 
 def srv():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -83,9 +83,9 @@ def srv():
                         break
                     try:
                         tbl = http_request_parse(data.decode('utf-8'))
-                        s = ""
-                        with open(tbl['path']) as f:
-                            s = f.read()
+                        text = ""
+                        with open("./html"+tbl['path']) as f:
+                            text = f.read()
                             conn.sendall("""HTTP/1.1 200 OK
 Date: Mon, 27 Jul 2009 12:28:53 GMT
 Server: unche
@@ -96,8 +96,8 @@ Content-Length: 51
 Vary: Accept-Encoding
 Content-Type: text/html
 
-{}""".format(s).encode('utf-8'))
-                    except:
+{}""".format(text).encode('utf-8'))
+                    except FileNotFoundError:
                         conn.sendall("""HTTP/1.1 404 Not Found
 Server: unche
 Date: Mon, 27 Jul 2009 12:28:53 GMT
@@ -106,7 +106,7 @@ Content-Type: text/plain
 Connection: keep-alive
 
 404 not found...
-""")
+""".encode('utf-8'))
 
 
 if __name__ == '__main__':
